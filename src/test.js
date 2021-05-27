@@ -1,22 +1,30 @@
-import axios from 'axios';
 import { Selector, ClientFunction } from 'testcafe';
-import deviceListLength from './utility';
-
-const API_URL = 'http://localhost:3000';
-const devicesPath = `${API_URL}/devices`;
+import {
+  API_URL,
+  APP_URL,
+  devicesPath,
+  updateFirstDeviceData,
+  specialListItemData,
+} from './constants';
+import {
+  getDeviceListLength,
+  getDevices,
+  updateDevice,
+  deleteDevice,
+  createDevice,
+} from './utility';
 
 // eslint-disable-next-line template-tag-spacing, no-undef, no-unused-expressions
 fixture `Test Device List Page`
 // eslint-disable-next-line template-tag-spacing
-  .page `http://localhost:3001/`;
+  .page `${APP_URL}`;
 
 // Test 1
-// Make an API call to retrieve the list of devices.
-// Use the list of devices to check the elements are visible in the DOM. Check the name,
-// type and capacity of each element of the list using the class names and make sure they
-// are correctly displayed.
+// Make an API call to retrieve the list of devices. Use the list of devices to check the
+// elements are visible in the DOM. Check the name, type and capacity of each element of
+// the list using the class names and make sure they are correctly displayed.
 test('Test correct display of name, type, capacity of a device', async (t) => {
-  const { data: listOfDevices } = await axios.get(devicesPath);
+  const listOfDevices = await getDevices();
   const deviceInfo = listOfDevices.map(async (device) => {
     await t.expect(Selector('div.device-info span.device-name').withText(device.system_name).exists).eql(true);
     await t.expect(Selector('div.device-info span.device-type').withText(device.type).exists).eql(true);
@@ -71,17 +79,11 @@ test('Add a device and check if it is visible with correct data', async (t) => {
 // Make an API call that renames the first device of the list to “Renamed Device”.
 // Reload the page and verify the modified device has the new name.
 test('Rename first device and verify modified device has new name', async (t) => {
-  const { data: listOfDevices } = await axios.get(devicesPath);
+  const listOfDevices = await getDevices();
   const firstDeviceID = listOfDevices[0].id;
   const firstDevicePath = `${API_URL}/devices/${firstDeviceID}`;
 
-  // Update First Device
-  const updateFirstDeviceData = {
-    system_name: 'Renamed Device',
-    type: 'WINDOWS_SERVER',
-    hdd_capacity: '500 GB',
-  };
-  await axios.put(firstDevicePath, updateFirstDeviceData);
+  await updateDevice(firstDevicePath, updateFirstDeviceData);
 
   // Reload Page
   await t.eval(() => window.location.reload(true));
@@ -98,21 +100,21 @@ test('Rename first device and verify modified device has new name', async (t) =>
 // Reload the page and verify the element is no longer visible and it doesn’t exist in the
 // DOM.
 test('Delete last element and verify element is no longer visible', async (t) => {
-  const { data: listOfDevices } = await axios.get(devicesPath);
-  const deviceItemsPreDeletion = await deviceListLength();
+  const listOfDevices = await getDevices();
+  const deviceItemsPreDeletion = await getDeviceListLength();
 
   const lastDevice = listOfDevices[deviceItemsPreDeletion - 1];
   const lastDevicePath = `${API_URL}/devices/${lastDevice.id}`;
 
   // Delete last ID
-  await axios.delete(lastDevicePath);
+  await deleteDevice(lastDevicePath);
 
   // Reload Page
   await t.eval(() => window.location.reload(true));
   await t.wait(2000);
 
   // Check Device list count (it should not be same)
-  const deviceItemsPostDeletion = await deviceListLength();
+  const deviceItemsPostDeletion = await getDeviceListLength();
   await t.expect(deviceItemsPreDeletion).notEql(deviceItemsPostDeletion);
 
   // Check Page and the element should not be there
@@ -120,14 +122,8 @@ test('Delete last element and verify element is no longer visible', async (t) =>
 });
 
 test('Create a new element, delete it and verify element is no longer visible', async (t) => {
-  const specialListItem = {
-    system_name: 'A Special System',
-    type: 'WINDOWS_WORKSTATION',
-    hdd_capacity: '100',
-  };
-
   // Create a new Element
-  const { data: newListElement } = await axios.post(devicesPath, specialListItem);
+  const newListElement = await createDevice(devicesPath, specialListItemData);
 
   // Reload Page
   await t.eval(() => window.location.reload(true));
@@ -135,11 +131,11 @@ test('Create a new element, delete it and verify element is no longer visible', 
 
   // Delete item
   const deleteDevicePath = `${API_URL}/devices/${newListElement.id}`;
-  await axios.delete(deleteDevicePath);
+  await deleteDevice(deleteDevicePath);
 
   // Reload Page
   await t.eval(() => window.location.reload(true));
-  await t.wait(5000);
+  await t.wait(2000);
 
   // Check Page and the element should not be there
   await t.expect(Selector('div.device-info span.device-name').withText(newListElement.system_name).exists).notOk();

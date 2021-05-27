@@ -1,12 +1,26 @@
 import axios from 'axios';
+import { devicesPath } from './constants';
 
-const API_URL = 'http://localhost:3000';
-
-export const deviceListLength = async () => {
-  const devicesPath = `${API_URL}/devices`;
-  const { data: listOfDevices } = await axios.get(devicesPath);
-  const deviceItemsLength = listOfDevices.length;
-  return deviceItemsLength;
+export const getDevices = async () => {
+  const { data } = await axios.get(devicesPath);
+  return data;
 };
 
-export default deviceListLength;
+export const updateDevice = async (path, updateData) => {
+  const { data } = await axios.put(path, updateData);
+  return data;
+};
+
+export const deleteDevice = async (path) => {
+  await axios.delete(path);
+};
+
+export const createDevice = async (path, createData) => {
+  const { data } = await axios.post(path, createData);
+  return data;
+};
+
+export const getDeviceListLength = async () => {
+  const listOfDevices = await getDevices();
+  return listOfDevices.length;
+};

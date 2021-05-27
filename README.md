@@ -30,5 +30,5 @@ $ node_modules/testcafe/bin/testcafe-with-v8-flag-filter.js chrome test.js
 Done in 25.94s.
 ```
 ### Notes
-- I chose to use axios for its ease of use.
+- I chose to use axios for less code and ease of use.
 - I didn't want to install testcafe globally, so am using one from node_modules in my package json target.
