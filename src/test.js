@@ -31,6 +31,11 @@ test('Test correct display of name, type, capacity of a device', async (t) => {
     await t.expect(Selector('div.device-info span.device-capacity').withText(device.hdd_capacity).exists).eql(true);
   });
   await Promise.all(deviceInfo);
+  const editDeleteBtns = listOfDevices.map(async (device, index) => {
+    await t.expect(Selector('div.device-options a.device-edit').nth(index).withText('EDIT').exists).eql(true);
+    await t.expect(Selector('div.device-options button.device-remove').nth(index).withText('REMOVE').exists).eql(true);
+  });
+  await Promise.all(editDeleteBtns);
 });
 
 // Test 2
