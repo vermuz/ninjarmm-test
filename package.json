@@ -1,0 +1,21 @@
+{
+  "name": "testcafe_assesment_ninajarmm",
+  "version": "0.0.1",
+  "description": "Testcafe assesment for NinjaRMM",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/testcafe/bin/testcafe-with-v8-flag-filter.js chrome src/test.js",
+    "lint": "eslint --quiet src"
+  },
+  "author": "Chaudhry Usman Ali",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "testcafe": "^1.14.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.23.3"
+  }
+}
